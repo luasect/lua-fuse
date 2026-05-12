@@ -1,3 +1,7 @@
+if jit then
+    require("ffi")
+end
+
 -- Variables
 
 local programArgs = {
@@ -135,7 +139,7 @@ local function getFileRequires(file)
     file:seek("set", 0)
 
     for modName in content:gmatch("require%(\"([A-Za-z%d%.]+)\"%)") do
-        local exists, filename = moduleExists(modName)
+        local exists, filename = moduleExists(modName:gsub("%.", "/"))
         if not exists then
             error("module '" .. modName .. "' does not exist.")
         end
@@ -153,8 +157,10 @@ local function getFileRequires(file)
             error("error opening module " .. err)
         end
 
-        table.insert(modules, { modName, modFilename })
+        getFileRequires(modFile)
 
+        print(modName)
+        table.insert(modules, { modName, modFilename })
         modFile:close()
 
         ::continue::
