@@ -1,0 +1,11 @@
+For information about the module, please open README.txt
+This software was primarily tested on MSYS MINGW64. That being said it should
+work just as well on any POSIX or Unix system as there is support for it.
+
+Usage:
+lua fuse.lua [input] [-R<dir>] [-o output] 
+
+options:
+    -o <file>   Write output to <file>. default is stdout
+    -r <dir>    Directory for the module searcher
+    -h / -help  Prints the usage. Will exit immediately after printing.
