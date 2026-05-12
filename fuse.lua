@@ -91,13 +91,19 @@ local function openHandles()
     end
 end
 
----@type fun(name: string): boolean
+---@type fun(name: string): boolean, filename: string?
 local function moduleExists(name)
     local fullname = programArgs.requireFolder .. "/" .. name
     local luaFile = io.open(fullname .. ".lua", "r+")
     if luaFile then
         luaFile:close()
         return true
+    end
+
+    luaFile = io.open(fullname .. "/init.lua", "r+")
+    if luaFile then
+        luaFile:close()
+        return true, fullname .. "/init.lua"
     end
 
     local ext = jit.os == "Windows" and ".dll" or ".so"
@@ -129,7 +135,8 @@ local function getFileRequires(file)
     file:seek("set", 0)
 
     for modName in content:gmatch("require%(\"([A-Za-z%d%.]+)\"%)") do
-        if not moduleExists(modName) then
+        local exists, filename = moduleExists(modName)
+        if not exists then
             error("module '" .. modName .. "' does not exist.")
         end
         if package.loaded[modName] then
@@ -140,7 +147,7 @@ local function getFileRequires(file)
                 goto continue
             end
         end
-        local modFilename = programArgs.requireFolder .. "/" .. modName:gsub("%.", "/") .. ".lua"
+        local modFilename = filename or programArgs.requireFolder .. "/" .. modName:gsub("%.", "/") .. ".lua"
         local modFile, err = io.open(modFilename, "rb")
         if not modFile then
             error("error opening module " .. err)
